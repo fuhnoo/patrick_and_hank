@@ -1,0 +1,5 @@
+credentials.txt
+*.pyc
+now.json
+.nowignore
+nohup.out
