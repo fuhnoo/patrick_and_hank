@@ -17,6 +17,35 @@ def kitty(bot, update):
     photo_url=instagram_photos[random_number]
     update.message.reply_photo(photo=photo_url, quote=False)
 
+def wow(bot, update):
+    wowstrings = [
+            'Wow',
+            'Like wow',
+            'Just wow',
+            'W O W'
+            ]
+    random_number = random.randint(1, len(wowstrings) + 1)
+    bot.send_message(chat_id=update.message.chat_id, text=wowstrings[random_number])
+
+def beautiful(bot, update):
+    beautifulstrings = [
+            'Beautiful',
+            'So beautiful',
+            "It's beautiful",
+            'And beautiful'
+            ]
+    random_number = random.randint(1, len(beautifulstrings) + 1)
+    bot.send_message(chat_id=update.message.chat_id, text=beautifulstrings[random_number])
+
+def triggered(bot, update):
+    if update.message.from_user.username == 'grandmachine':
+        triggered_gif_url = 'https://media.giphy.com/media/vk7VesvyZEwuI/giphy.gif'
+        bot.send_animation(chat_id=update.message.chat_id, animation=triggered_gif_url)
+
+def sorry(bot, update):
+    sorry_gif_url = 'https://media.giphy.com/media/CfaK14cY4CXao/giphy.gif'
+    bot.send_animation(chat_id=update.message.chat_id, animation=sorry_gif_url)
+
 def error(bot, update, error):
     """Log errors caused by updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
@@ -31,8 +60,20 @@ def main():
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
-    # on different commands - answer in Telegram
+    # Post picture of kitty when '/kitty' is said
     dp.add_handler(RegexHandler('.*\/kitty.*', kitty))
+
+    # Allo wow spam
+    dp.add_handler(RegexHandler('.*(?i)wow.*', wow))
+
+    # Allo beautiful spam
+    dp.add_handler(RegexHandler('.*(?i)beautiful.*', beautiful))
+
+    # grandmachine triggered auto response
+    dp.add_handler(RegexHandler('.*((?i)exposed|(?i)trash|(?i)lonzo|(?i)garbage|(?i)lakers|(?i)jesus|(?i)wtf|(?i)triggered).*', triggered))
+
+    # sorry gif
+    dp.add_handler(RegexHandler('.*((?i)sorry|(?i)sohrry|(?i)sorey|(?i)soarry).*', sorry))
 
     # log all errors
     dp.add_error_handler(error)
