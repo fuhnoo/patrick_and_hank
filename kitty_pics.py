@@ -2,7 +2,7 @@ from cachetools import cached, TTLCache
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
-cache = TTLCache(maxsize=1000, ttl=86400) # caches 500 items. updates every 24 hours (86400 seconds)
+cache = TTLCache(maxsize=1000, ttl=86400) # caches 1000 items. updates every 24 hours (86400 seconds)
 
 class KittyPics(object):
     def __init__(self):

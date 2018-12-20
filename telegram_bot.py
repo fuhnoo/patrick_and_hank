@@ -1,4 +1,4 @@
-from kittypics import KittyPics
+from kitty_pics import KittyPics
 from telegram.ext import Updater, RegexHandler, Filters
 import logging
 import os
