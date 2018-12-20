@@ -3,3 +3,8 @@ credentials.txt
 now.json
 .nowignore
 nohup.out
+old
+client_secrets.json
+mycreds.txt
+settings.yaml
+token.json

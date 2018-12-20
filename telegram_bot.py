@@ -1,50 +1,88 @@
-from instagram_bot import GetRecentPics
+from kittypics import KittyPics
 from telegram.ext import Updater, RegexHandler, Filters
 import logging
 import os
 import random
+import time
 
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 token = os.environ['BOT_TOKEN']
 
+class CoolDown(object):
+    def __init__(self):
+        self.last_time = {
+            'kitty': time.strptime("01 Jan 1970", "%d %b %Y"),
+            'wow': time.strptime("01 Jan 1970", "%d %b %Y"),
+            'beautiful': time.strptime("01 Jan 1970", "%d %b %Y"),
+            'triggered': time.strptime("01 Jan 1970", "%d %b %Y"),
+            'sorry': time.strptime("01 Jan 1970", "%d %b %Y")
+        }
+
+    def check(self, func):
+        if (time.mktime(time.localtime()) - time.mktime(self.last_time[func])) > 30:
+            self.last_time[func] = time.localtime()
+            return True
+        else:
+            return False
+
+cooldown = CoolDown()
+
 def kitty(bot, update):
-    """Sends a random picture from patrick_and_hank's Instagram page to chat."""
-    logger.info("Sending kitty pic...")
-    instagram_photos = GetRecentPics().pics
-    random_number = random.randint(1, len(instagram_photos) + 1)
-    photo_url=instagram_photos[random_number]
-    update.message.reply_photo(photo=photo_url, quote=False)
+    """Sends a random picture from shared kittypics Google Drive folder to chat."""
+    cooldown_ended = cooldown.check('kitty')
+    if cooldown_ended:
+        logger.info("Sending kitty pic...")
+        kitty_photos = KittyPics().pics
+        random_number = random.randint(0, len(kitty_photos) - 1)
+        photo_url=kitty_photos[random_number]
+        update.message.reply_photo(photo=photo_url, quote=False)
 
 def wow(bot, update):
-    wowstrings = [
-            'Wow',
-            'Like wow',
-            'Just wow',
-            'W O W'
-            ]
-    random_number = random.randint(1, len(wowstrings) + 1)
-    bot.send_message(chat_id=update.message.chat_id, text=wowstrings[random_number])
+    random_number = random.randint(1, 5)
+    if random_number == 3:
+        cooldown_ended = cooldown.check('wow')
+        if cooldown_ended:
+            wowstrings = [
+                    'Wow',
+                    'Like wow',
+                    'Just wow',
+                    'W O W'
+                    ]
+            random_number = random.randint(0, len(wowstrings) - 1)
+            bot.send_message(chat_id=update.message.chat_id, text=wowstrings[random_number])
 
 def beautiful(bot, update):
-    beautifulstrings = [
-            'Beautiful',
-            'So beautiful',
-            "It's beautiful",
-            'And beautiful'
-            ]
-    random_number = random.randint(1, len(beautifulstrings) + 1)
-    bot.send_message(chat_id=update.message.chat_id, text=beautifulstrings[random_number])
+    random_number = random.randint(1, 5)
+    if random_number == 3:
+        cooldown_ended = cooldown.check('beautiful')
+        if cooldown_ended:
+            beautifulstrings = [
+                    'Beautiful',
+                    'So beautiful',
+                    "It's beautiful",
+                    'And beautiful'
+                    ]
+            random_number = random.randint(0, len(beautifulstrings) - 1)
+            bot.send_message(chat_id=update.message.chat_id, text=beautifulstrings[random_number])
 
 def triggered(bot, update):
     if update.message.from_user.username == 'grandmachine':
-        triggered_gif_url = 'https://media.giphy.com/media/vk7VesvyZEwuI/giphy.gif'
-        bot.send_animation(chat_id=update.message.chat_id, animation=triggered_gif_url)
+        random_number = random.randint(1, 3)
+        if random_number == 2:
+            cooldown_ended = cooldown.check('triggered')
+            if cooldown_ended:
+                triggered_gif_url = 'https://media.giphy.com/media/vk7VesvyZEwuI/giphy.gif'
+                bot.send_animation(chat_id=update.message.chat_id, animation=triggered_gif_url)
 
 def sorry(bot, update):
-    sorry_gif_url = 'https://media.giphy.com/media/CfaK14cY4CXao/giphy.gif'
-    bot.send_animation(chat_id=update.message.chat_id, animation=sorry_gif_url)
+    random_number = random.randint(1, 10)
+    if random_number == 7:
+        cooldown_ended = cooldown.check('sorry')
+        if cooldown_ended:
+            sorry_gif_url = 'https://media.giphy.com/media/CfaK14cY4CXao/giphy.gif'
+            bot.send_animation(chat_id=update.message.chat_id, animation=sorry_gif_url)
 
 def error(bot, update, error):
     """Log errors caused by updates."""
@@ -70,10 +108,10 @@ def main():
     dp.add_handler(RegexHandler('.*(?i)beautiful.*', beautiful))
 
     # grandmachine triggered auto response
-    dp.add_handler(RegexHandler('.*((?i)exposed|(?i)trash|(?i)lonzo|(?i)garbage|(?i)lakers|(?i)jesus|(?i)wtf|(?i)triggered).*', triggered))
+    dp.add_handler(RegexHandler('.*(?i)(exposed|trash|lonzo|garbage|lakers|jesus|wtf|triggered).*', triggered))
 
     # sorry gif
-    dp.add_handler(RegexHandler('.*((?i)sorry|(?i)sohrry|(?i)sorey|(?i)soarry).*', sorry))
+    dp.add_handler(RegexHandler('.*(?i)(sorry|sohrry|sorey|soarry).*', sorry))
 
     # log all errors
     dp.add_error_handler(error)
