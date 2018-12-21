@@ -12,17 +12,17 @@ token = os.environ['BOT_TOKEN']
 
 class CoolDown(object):
     def __init__(self):
-        self.last_time = {
-            'kitty': time.strptime("01 Jan 1970", "%d %b %Y"),
-            'wow': time.strptime("01 Jan 1970", "%d %b %Y"),
-            'beautiful': time.strptime("01 Jan 1970", "%d %b %Y"),
-            'triggered': time.strptime("01 Jan 1970", "%d %b %Y"),
-            'sorry': time.strptime("01 Jan 1970", "%d %b %Y")
-        }
+        self.last_time = {}
 
-    def check(self, func):
-        if (time.mktime(time.localtime()) - time.mktime(self.last_time[func])) > 30:
-            self.last_time[func] = time.localtime()
+    def check(self, func, chat_id, cooldown):
+        if not func in self.last_time.keys():
+            self.last_time[func] = {}
+
+        if not chat_id in self.last_time[func].keys():
+            self.last_time[func][chat_id] = time.strptime("01 Jan 1970", "%d %b %Y")
+            
+        if (time.mktime(time.localtime()) - time.mktime(self.last_time[func][chat_id])) >= cooldown:
+            self.last_time[func][chat_id] = time.localtime()
             return True
         else:
             return False
@@ -31,7 +31,7 @@ cooldown = CoolDown()
 
 def kitty(bot, update):
     """Sends a random picture from shared kittypics Google Drive folder to chat."""
-    cooldown_ended = cooldown.check('kitty')
+    cooldown_ended = cooldown.check('kitty', update.message.chat_id, 15)
     if cooldown_ended:
         logger.info("Sending kitty pic...")
         kitty_photos = KittyPics().pics
@@ -42,7 +42,7 @@ def kitty(bot, update):
 def wow(bot, update):
     random_number = random.randint(1, 5)
     if random_number == 3:
-        cooldown_ended = cooldown.check('wow')
+        cooldown_ended = cooldown.check('wow', update.message.chat_id, 30)
         if cooldown_ended:
             wowstrings = [
                     'Wow',
@@ -56,12 +56,13 @@ def wow(bot, update):
 def beautiful(bot, update):
     random_number = random.randint(1, 5)
     if random_number == 3:
-        cooldown_ended = cooldown.check('beautiful')
+        cooldown_ended = cooldown.check('beautiful', update.message.chat_id, 30)
         if cooldown_ended:
             beautifulstrings = [
                     'Beautiful',
                     'So beautiful',
                     "It's beautiful",
+                    'Absolutely beautiful',
                     'And beautiful'
                     ]
             random_number = random.randint(0, len(beautifulstrings) - 1)
@@ -71,7 +72,7 @@ def triggered(bot, update):
     if update.message.from_user.username == 'grandmachine':
         random_number = random.randint(1, 3)
         if random_number == 2:
-            cooldown_ended = cooldown.check('triggered')
+            cooldown_ended = cooldown.check('triggered', update.message.chat_id, 30)
             if cooldown_ended:
                 triggered_gif_url = 'https://media.giphy.com/media/vk7VesvyZEwuI/giphy.gif'
                 bot.send_animation(chat_id=update.message.chat_id, animation=triggered_gif_url)
@@ -79,7 +80,7 @@ def triggered(bot, update):
 def sorry(bot, update):
     random_number = random.randint(1, 10)
     if random_number == 7:
-        cooldown_ended = cooldown.check('sorry')
+        cooldown_ended = cooldown.check('sorry', update.message.chat_id, 30)
         if cooldown_ended:
             sorry_gif_url = 'https://media.giphy.com/media/CfaK14cY4CXao/giphy.gif'
             bot.send_animation(chat_id=update.message.chat_id, animation=sorry_gif_url)
